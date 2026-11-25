@@ -31,5 +31,8 @@ source "drivers/misc/mediatek/pwm/Kconfig"
 source "drivers/misc/mediatek/pmic/Kconfig"
 source "drivers/misc/mediatek/pmic_wrap/Kconfig"
 source "drivers/misc/mediatek/aee/Kconfig"
+source "drivers/misc/mediatek/base/power/Kconfig"
+source "drivers/misc/mediatek/boot/Kconfig"
+source "drivers/misc/mediatek/rtc/Kconfig"
 
 endif
