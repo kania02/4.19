@@ -186,3 +186,14 @@ obj-$(CONFIG_MULTIPLEXER)	+= mux/
 obj-$(CONFIG_UNISYS_VISORBUS)	+= visorbus/
 obj-$(CONFIG_SIOX)		+= siox/
 obj-$(CONFIG_GNSS)		+= gnss/
+
+obj-$(CONFIG_BATTERY_SAMSUNG)	+= battery/common/
+obj-$(CONFIG_CHARGER_S2MU005)	+= battery/charger/s2mu005_charger/
+obj-$(CONFIG_FUELGAUGE_S2MU005)	+= battery/fuelgauge/s2mu005_fuelgauge/
+obj-$(CONFIG_MFD_S2MU005)	+= mfd/slsi/s2mu005/
+obj-$(CONFIG_USE_MUIC)		+= muic/common/
+obj-$(CONFIG_MUIC_S2MU005)	+= muic/slsi/s2mu005/
+obj-$(CONFIG_SEC_EXT)		+= samsung/
+obj-$(CONFIG_SWITCH)		+= switch/
+obj-$(CONFIG_SEC_ABC)		+= sti/abc/
+obj-$(CONFIG_HWMON)		+= hwmon/sec_thermistor/

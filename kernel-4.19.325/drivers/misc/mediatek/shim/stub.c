@@ -3,19 +3,8 @@
 #include <linux/err.h>
 #include <linux/export.h>
 
-struct class *sec_class;
-EXPORT_SYMBOL(sec_class);
 
-static int __init a02_sec_class_create(void)
-{
-	sec_class = class_create(THIS_MODULE, "sec");
-	if (IS_ERR(sec_class)) {
-		pr_err("Failed to create class(sec) %ld\n", PTR_ERR(sec_class));
-		return PTR_ERR(sec_class);
-	}
-	return 0;
-}
-arch_initcall_sync(a02_sec_class_create);
+/* class "sec" dibuat oleh drivers/samsung/sec_class.c */
 
 u32 get_devinfo_with_index(u32 index)
 {

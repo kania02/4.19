@@ -56,8 +56,8 @@ Update terakhir: 25 Nov 2026. Baca SEMUA sebelum menjawab.
 - Edit pakai `python3` heredoc dengan cek pola (count harus pas) sebelum menulis.
 - Jangan edit file otomatis tanpa user lihat; tampilkan sebagai command.
 
-## Build (MANUAL INCREMENTAL, jalankan oleh USER di terminalnya)
-- JANGAN pakai `build_kernel.sh`/skrip/z64. JANGAN `make clean`. Jangan jalankan build sendiri lewat agent.
+## Build (MANUAL INCREMENTAL)
+- JANGAN pakai `build_kernel.sh`/skrip/z64. JANGAN `make clean`. Jalankan build sendiri lewat agent.
 - User WAJIB melihat progres build penuh (tanpa grep/head/tail di proses build), tapi di akhir ada ringkasan error.
 - Ubah CONFIG apa pun = rebuild hampir penuh (user benci nunggu): gabungkan perubahan config jadi satu build.
 

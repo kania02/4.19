@@ -1,0 +1,19 @@
+subdir-ccflags-y += -include $(srctree)/drivers/misc/mediatek/base/power/include/mtk_cpu_compat.h
+obj-$(CONFIG_MACH_MT6739) += mt6739/
+obj-$(CONFIG_MACH_MT6739) += cpufreq_v2/
+obj-$(CONFIG_MACH_MT6739) += ppm_v3/
+obj-$(CONFIG_MACH_MT6739) += eem_v2/
+ifeq ($(CONFIG_MTK_UNIFY_POWER), y)
+obj-$(CONFIG_MACH_MT6739) += upower_v2/
+endif
+ifneq ($(CONFIG_FPGA_EARLY_PORTING), y)
+obj-$(CONFIG_MACH_MT6739) += pbm_v3/
+obj-$(CONFIG_MACH_MT6739) += vcorefs_v3/
+endif
+obj-$(CONFIG_MACH_MT6739) += cpuidle_v3/
+obj-$(CONFIG_MACH_MT6739) += clkbuf_v1/
+obj-$(CONFIG_MACH_MT6739) += power_gs_v1/
+obj-$(CONFIG_MACH_MT6739) += cpuhotplug/
+obj-$(CONFIG_MACH_MT6739) += spm_v4/
+obj-$(CONFIG_MACH_MT6739) += dcm_v1/
+obj-$(CONFIG_MACH_MT6739) += mcdi/

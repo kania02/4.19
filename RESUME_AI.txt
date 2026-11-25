@@ -1,0 +1,70 @@
+RESUME PROJECT — PORT KERNEL 4.19.325 KE SAMSUNG A02
+Tanggal: 25 Nov 2026
+
+TUJUAN
+- Port kernel 4.19.325 ke Samsung Galaxy A02 (MT6739), pertahankan driver/HAL A02.
+- Target akhir: boot stabil ke homescreen, layar sentuh dan navbar berfungsi, tidak hang/reboot acak, tidak ada popup peringatan.
+- Kernel pembanding yang diketahui berfungsi: 4.14.336.
+- Root repo memakai kernel 4.14.336; tree port ada di kernel-4.19.325/; referensi A02 ada di ref_oc/.
+
+STATUS TERAKHIR — TERBUKTI
+- Build kernel br5 berhasil dan sudah direpack menjadi boot image.
+- File: boot_k419_br5.img (di root repo)
+- Ukuran: 25.165.824 byte
+- MD5: cdf3b02dc8a11192b53327249e74a20e
+- Base repack: boot_k419_mmc43.img (ramdisk/header), bukan kernel pembanding.
+- Build menjalankan Image.gz dan mediatek/mt6739.dtb, kemudian repack via repack_a02.py.
+- Linker error dari percobaan sebelumnya sudah diatasi; build br5 selesai tanpa error fatal.
+- Masih ada warning kompilasi nonfatal, antara lain variable/fungsi unused, CONFIG_MTK_GAUGE_VERSION tidak terdefinisi, redefinisi array_size, dan operand-width warning.
+- br5 BELUM diflash atau diuji di HP. Gambar br2 adalah image terakhir yang diketahui sempat ter-flash; status HP saat ini belum dikonfirmasi.
+- Tidak ada commit/push br5 yang dilakukan. Defconfig sudah diedit, tapi savedefconfig/backup konfigurasi hasil build belum dilakukan.
+
+PERBAIKAN LINK TERAKHIR UNTUK BR5
+- drivers/misc/mediatek/Kconfig dan Makefile: masukkan wiring ram_console.
+- Defconfig: aktifkan CONFIG_MTK_RAM_CONSOLE; nonaktifkan CONFIG_SEC_DEBUG_INIT_LOG dan CONFIG_SEC_DEBUG_AUTO_COMMENT karena provider hook terkait tidak ada di tree 4.19 ini.
+- fs/pstore/ram_core.c: ekspor persistent_ram_vmap agar dapat dipakai Samsung sec_log.
+- drivers/samsung/misc/sec_log.c: tangkap log printk menggunakan console 4.19, bukan register_log_text_hook yang tidak tersedia.
+- drivers/samsung/sec_reboot.c: simpan callback arm_pm_restart platform sebelum memasang callback Samsung; gunakan restart handler dan callback platform, bukan wdt_arch_reset yang tidak tersedia.
+- drivers/samsung/debug/sec_debug.c: catat bahwa DDR-reserved watchdog mode belum di-port; fitur ini tidak diaktifkan.
+- Backup file sebelum patch tersedia dengan akhiran .bak_br5; jangan timpa/hapus backup.
+
+KONTEKS PORT BATERAI
+- Driver Samsung S2MU005 battery/charger/fuel gauge, MUIC, thermistor, USB notifier dan header pendukung sudah ditambahkan dari ref_oc dan wiring Kconfig/Makefile dibuat.
+- Power-supply enum/properti A02 telah ditambahkan ke include/linux/power_supply.h dan tabel sysfs.
+- Build br5 membuktikan stack tersebut dapat dikompilasi dan di-link; fungsi hardware baterai belum diuji di HP.
+- Perubahan dari pekerjaan sebelumnya ada dalam worktree dan banyak file masih untracked. Jangan reset, clean, atau menghapus file yang belum dipahami.
+
+STATUS MASALAH DEVICE / ROM — BELUM DIANGGAP SELESAI
+- Navbar hilang, Quick Settings tidak bisa ditarik, dan Settings crash pernah berkaitan dengan device_provisioned=0 serta user_setup_complete=0. User menyatakan tiga gejala itu karena provisioned; ini masalah ROM/framework, bukan otomatis diselesaikan oleh kernel.
+- User pernah meminta nama kernel tanpa "port-bootstrap"; belum dikerjakan. Defconfig masih berisi CONFIG_LOCALVERSION="-a02-4.19-port-bootstrap".
+- SSRM Warning pernah menampilkan com.sec.android.sdhms. Log menyebut GPUFreqMax invalid 395000 dan 482500; OPP GPU 4.19 yang pernah terukur adalah 450000/400000/350000/290000 KHz. Penyebab pasti belum dipastikan dan br5 belum diuji.
+- Power supply/thermal sysfs pernah kosong atau path tertentu ENOENT. Integrasi baterai dan fuel gauge br5 belum diverifikasi runtime.
+- HP dengan rm2 pernah hang/mati acak sekitar 176–700 detik; belum diuji ulang di br2/br5.
+- Gejala rm2 lain yang belum dipastikan di br2/br5: navbar, PMIC irq -524, eMMC HS 52MHz, RTC, serta subsistem power/DVFS.
+
+LINGKUNGAN DAN ALUR KERJA
+- Workspace Codespaces: /workspaces/4.19; branch diketahui: port; origin: https://github.com/kania02/4.19.
+- Toolchain diketahui: clang 18.1.3, ld.lld, aarch64-linux-gnu-gcc.
+- Di Codespaces tidak ada adb. Flash/tarik boot dilakukan user dari Windows cmd saat HP berada di OrangeFox (OFox).
+- Partition boot perangkat: /dev/block/mmcblk0p35, ukuran image 25.165.824 byte. Jangan gunakan A/B slot.
+- File image untuk tes biasanya disimpan user di D:\\Downloads_Baru. User sendiri yang menjalankan adb/flash.
+- Instruksi utama repo ada di .github/copilot-instructions.md; baca isinya sebelum langkah selanjutnya.
+- Instruksi tersebut meminta build dijalankan oleh agent, incremental, tanpa build_kernel.sh/z64 dan tanpa make clean; tampilkan output build lengkap, lalu ringkas error setelah build selesai.
+- Untuk Codespaces, clear dapat gagal tanpa TERM; gunakan TERM=xterm clear.
+- Perubahan CONFIG digabung dalam satu build karena dapat memicu rebuild panjang. Setelah perubahan, update out/.config dengan scripts/config dan olddefconfig.
+- Sebelum edit file baru/berikutnya, ikuti aturan backup repository: cp --update=none file file.bak_<kode>. Jangan mengubah atau menghapus backup yang sudah ada.
+- Hindari tes HP yang sangat lama tanpa alasan. Setelah adb muncul, ambil dmesg lebih awal (sebelum kira-kira 100 detik) karena ring buffer cepat tertimpa.
+- Jangan ulang dump_reg massal modul 0–15 via dispsys karena pernah memicu hang. Jangan pakai adb wait-for-device.
+- Aturan user: berhenti setelah tiga trial gagal untuk satu perubahan.
+
+LANGKAH LANJUT YANG DISARANKAN
+1. Jangan build ulang br5 kecuali ada perubahan baru; image sudah terbukti dibuat. User perlu mengunduh boot_k419_br5.img dan memutuskan kapan mengujinya.
+2. Sebelum flash, pastikan file di PC punya ukuran 25.165.824 byte dan MD5 cdf3b02dc8a11192b53327249e74a20e.
+3. Jika br5 diuji, pastikan boot/recovery dan layar/sentuh berfungsi; kumpulkan dmesg/logcat segera setelah adb terdeteksi. Jangan menyimpulkan stabilitas atau perbaikan SSRM/baterai sebelum tes.
+4. Sesudah build sukses, ikuti instruksi repo untuk menyimpan konfigurasi hasil build (backup out/.config dan savedefconfig). Jangan commit/push tanpa memastikan cakupan perubahan dan instruksi terbaru.
+5. Untuk nama kernel tanpa port-bootstrap, ubah CONFIG_LOCALVERSION hanya setelah dikonfirmasi sebagai perubahan tersendiri, lalu gabungkan dengan perubahan CONFIG lain sebelum build berikutnya.
+6. Setelah br5 diuji, lanjutkan diagnosis SSRM/OPP GPU, battery/thermal sysfs, hang acak, navbar/provisioned, PMIC, RTC, dan eMMC berdasarkan data aktual—bukan asumsi.
+
+CATATAN STATUS
+- Status image dan build di atas terbukti dari output build/repack terakhir.
+- Boot br5, stabilitas, fungsi baterai, hilangnya popup, navbar, dan perubahan nama kernel belum terbukti pada perangkat.

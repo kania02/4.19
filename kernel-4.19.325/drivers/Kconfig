@@ -219,4 +219,16 @@ source "drivers/siox/Kconfig"
 
 source "drivers/slimbus/Kconfig"
 
+source "drivers/battery/common/Kconfig"
+source "drivers/battery/charger/s2mu005_charger/Kconfig"
+source "drivers/battery/fuelgauge/s2mu005_fuelgauge/Kconfig"
+source "drivers/mfd/slsi/s2mu005/Kconfig"
+source "drivers/muic/common/Kconfig"
+source "drivers/muic/slsi/s2mu005/Kconfig"
+source "drivers/samsung/Kconfig"
+source "drivers/switch/Kconfig"
+source "drivers/sti/common/Kconfig"
+source "drivers/sti/abc/Kconfig"
+source "drivers/hwmon/sec_thermistor/Kconfig"
+
 endmenu
