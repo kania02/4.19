@@ -44,6 +44,14 @@
 #include "ccci_bm.h"
 #include "ccci_platform.h"
 #include "ccci_hif_dpmaif.h"
+
+static void dpmaif_traffic_monitor_func(unsigned long data);
+static void dpmaif_traffic_timer_cb(struct timer_list *t)
+{
+	struct hif_dpmaif_ctrl *c = from_timer(c, t, traffic_monitor);
+
+	dpmaif_traffic_monitor_func((unsigned long)c);
+}
 #include "md_sys1_platform.h"
 #include "dpmaif_reg.h"
 #include "dpmaif_drv.h"
@@ -4552,9 +4560,7 @@ int ccci_dpmaif_hif_init(unsigned char hif_id, unsigned char md_id)
 
 	/* set debug related */
 #if DPMAIF_TRAFFIC_MONITOR_INTERVAL
-	init_timer(&hif_ctrl->traffic_monitor);
-	hif_ctrl->traffic_monitor.function = dpmaif_traffic_monitor_func;
-	hif_ctrl->traffic_monitor.data = (unsigned long)hif_ctrl;
+	timer_setup(&hif_ctrl->traffic_monitor, dpmaif_traffic_timer_cb, 0);
 #endif
 	ccci_hif[hif_id] = (void *)hif_ctrl;
 #ifdef MT6297

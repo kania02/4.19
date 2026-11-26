@@ -61,6 +61,24 @@
 //#include <linux/string.h>
 #include <linux/list.h>
 
+#ifndef ARPHRD_PUREIP
+#define ARPHRD_PUREIP 520
+#endif
+struct ccmni_timer_wrap {
+	struct timer_list t;
+	struct ccmni_instance *ccmni;
+};
+static void ccmni_netif_rx_list(struct list_head *head)
+{
+	struct sk_buff *skb, *next;
+
+	list_for_each_entry_safe(skb, next, head, list) {
+		list_del(&skb->list);
+		netif_rx_ni(skb);
+	}
+}
+#define netif_rx_list_ni ccmni_netif_rx_list
+
 
 struct ccmni_ctl_block *ccmni_ctl_blk[MAX_MD_NUM];
 
@@ -401,7 +419,7 @@ static inline int ccmni_forward_rx(struct ccmni_instance *ccmni,
 
 /********************netdev register function********************/
 static u16 ccmni_select_queue(struct net_device *dev, struct sk_buff *skb,
-	void *accel_priv, select_queue_fallback_t fallback)
+	struct net_device *sb_dev, select_queue_fallback_t fallback)
 {
 	struct ccmni_instance *ccmni =
 		(struct ccmni_instance *)netdev_priv(dev);
@@ -1044,9 +1062,10 @@ static int ccmni_napi_poll(struct napi_struct *napi, int budget)
 #endif
 }
 
-static void ccmni_napi_poll_timeout(unsigned long data)
+static void ccmni_napi_poll_timeout(struct timer_list *t)
 {
-	struct ccmni_instance *ccmni = (struct ccmni_instance *)data;
+	struct ccmni_timer_wrap *w = from_timer(w, t, t);
+	struct ccmni_instance *ccmni = w->ccmni;
 
 	CCMNI_DBG_MSG(ccmni->md_id,
 		"CCMNI%d lost NAPI polling\n", ccmni->index);
@@ -1093,15 +1112,14 @@ static inline int ccmni_inst_init(int md_id, struct ccmni_instance *ccmni,
 	ccmni->ctlb = ctlb;
 	ccmni->md_id = md_id;
 	ccmni->napi = kzalloc(sizeof(struct napi_struct), GFP_KERNEL);
-	ccmni->timer = kzalloc(sizeof(struct timer_list), GFP_KERNEL);
+	ccmni->timer = kzalloc(sizeof(struct ccmni_timer_wrap), GFP_KERNEL);
 	ccmni->spinlock = kzalloc(sizeof(spinlock_t), GFP_KERNEL);
 	ccmni->ack_prio_en = ccmni->ch.multiq ? 1 : 0;
 
 	/* register napi device */
 	if (dev && (ctlb->ccci_ops->md_ability & MODEM_CAP_NAPI)) {
-		init_timer(ccmni->timer);
-		ccmni->timer->function = ccmni_napi_poll_timeout;
-		ccmni->timer->data = (unsigned long)ccmni;
+		((struct ccmni_timer_wrap *)ccmni->timer)->ccmni = ccmni;
+		timer_setup(ccmni->timer, ccmni_napi_poll_timeout, 0);
 		netif_napi_add(dev, ccmni->napi, ccmni_napi_poll,
 			ctlb->ccci_ops->napi_poll_weigh);
 	}
@@ -1678,7 +1696,7 @@ static void ccmni_queue_state_callback(int md_id, int ccmni_idx,
 	switch (state) {
 #ifdef ENABLE_WQ_GRO
 	case RX_FLUSH:
-		if (!list_empty(&ccmni->napi->gro_list)) {
+		if (ccmni->napi->gro_bitmask) {
 			preempt_disable();
 			spin_lock_bh(ccmni->spinlock);
 			ccmni->rx_gro_cnt++;

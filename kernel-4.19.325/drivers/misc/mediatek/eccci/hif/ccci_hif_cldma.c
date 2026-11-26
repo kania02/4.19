@@ -52,6 +52,29 @@
 #include "ccci_fsm.h"
 #include "ccci_port.h"
 
+void md_cd_traffic_monitor_func(unsigned long data);
+#ifdef ENABLE_CLDMA_TIMER
+static void cldma_timeout_timer_func(unsigned long data);
+#endif
+static void md_cd_traffic_timer_cb(struct timer_list *t)
+{
+	struct md_cd_ctrl *c = from_timer(c, t, traffic_monitor);
+
+	md_cd_traffic_monitor_func((unsigned long)c);
+}
+#ifdef ENABLE_CLDMA_TIMER
+#ifdef ENABLE_CLDMA_TIMER
+#ifdef ENABLE_CLDMA_TIMER
+static void cldma_timeout_timer_cb(struct timer_list *t)
+{
+	struct md_cd_queue *q = from_timer(q, t, timeout_timer);
+
+	cldma_timeout_timer_func((unsigned long)q);
+}
+#endif
+#endif
+#endif
+
 #if defined(CLDMA_TRACE) || defined(CCCI_SKB_TRACE)
 #define CREATE_TRACE_POINTS
 #include "modem_cldma_events.h"
@@ -1630,9 +1653,7 @@ static void cldma_tx_queue_init(struct md_cd_queue *queue)
 	CCCI_DEBUG_LOG(md_ctrl->md_id, TAG, "txq%d work=%p\n",
 		queue->index, &queue->cldma_tx_work);
 #ifdef ENABLE_CLDMA_TIMER
-	init_timer(&queue->timeout_timer);
-	queue->timeout_timer.function = cldma_timeout_timer_func;
-	queue->timeout_timer.data = (unsigned long)queue;
+	timer_setup(&queue->timeout_timer, cldma_timeout_timer_cb, 0);
 	queue->timeout_start = 0;
 	queue->timeout_end = 0;
 #endif
@@ -3275,10 +3296,7 @@ int ccci_cldma_hif_init(unsigned char hif_id, unsigned char md_id)
 
 	atomic_set(&md_ctrl->cldma_irq_enabled, 1);
 #if TRAFFIC_MONITOR_INTERVAL
-	init_timer(&md_ctrl->traffic_monitor);
-	md_ctrl->traffic_monitor.function =
-		md_cd_traffic_monitor_func;
-	md_ctrl->traffic_monitor.data = (unsigned long)md_ctrl;
+	timer_setup(&md_ctrl->traffic_monitor, md_cd_traffic_timer_cb, 0);
 #endif
 	md_ctrl->tx_busy_warn_cnt = 0;
 

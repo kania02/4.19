@@ -38,3 +38,29 @@ int mdp_ioctl_alloc_readback_slots(void) { return -EINVAL; }
 int mdp_ioctl_free_readback_slots(void) { return -EINVAL; }
 int mdp_ioctl_read_readback_slots(void) { return -EINVAL; }
 void mdp_ioctl_free_job_by_node(void) {}
+
+/* BR12_LINKFIX */
+#include <linux/vmalloc.h>
+#include <linux/mm.h>
+#include <linux/pfn.h>
+#include <linux/mmzone.h>
+void dvfsrc_mdsrclkena_control(bool on) {}
+void *vmap_reserved_mem(phys_addr_t start, phys_addr_t size, pgprot_t prot)
+{
+	long i;
+	long page_count = DIV_ROUND_UP(size, PAGE_SIZE);
+	void *vaddr;
+	phys_addr_t addr = start;
+	struct page **pages = vmalloc(page_count * sizeof(struct page *));
+
+	if (!pages)
+		return NULL;
+	for (i = 0; i < page_count; i++) {
+		pages[i] = pfn_to_page(__phys_to_pfn(addr));
+		addr += PAGE_SIZE;
+	}
+	vaddr = vmap(pages, page_count, VM_MAP, prot);
+	vfree(pages);
+	return vaddr;
+}
+EXPORT_SYMBOL(vmap_reserved_mem);

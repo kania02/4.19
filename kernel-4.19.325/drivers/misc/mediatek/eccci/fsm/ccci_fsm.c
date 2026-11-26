@@ -19,7 +19,6 @@
 #include <memory/mediatek/emi.h>
 
 #if defined(CONFIG_MACH_MT6739)
-#include "plat_lastbus.h"
 #endif
 
 #if (MD_GENERATION >= 6297)
@@ -295,7 +294,7 @@ static void fsm_routine_exception(struct ccci_fsm_ctl *ctl,
 #if defined(CONFIG_MACH_MT6739)
 		CCCI_ERROR_LOG(ctl->md_id, FSM,
 			"No bus timeout!\n");
-		timeout_dump();
+		/* timeout_dump(): lastbus tidak ada di 4.19 */
 #endif
 
 		fsm_md_exception_stage(&ctl->ee_ctl, 2);

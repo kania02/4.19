@@ -30,3 +30,11 @@ obj-y += atf/
 
 obj-$(CONFIG_MTK_AUXADC) += auxadc/
 obj-y += devinfo/
+obj-y += rps/
+obj-$(CONFIG_MTK_COMBO) += connectivity/
+obj-$(CONFIG_MTK_BTIF) += btif/
+obj-$(CONFIG_MTK_CONN_MD) += conn_md/
+obj-$(CONFIG_MTK_CCCI_DEVICES) += ccci_util/
+obj-$(CONFIG_MTK_NET_CCMNI) += ccmni/
+obj-$(CONFIG_MTK_ECCCI_DRIVER) += eccci/
+obj-$(CONFIG_MTK_ECCCI_C2K) += c2k_usb/

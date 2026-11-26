@@ -45,6 +45,14 @@
 #include "ccif_c2k_platform.h"
 #else
 #include "md_sys1_platform.h"
+
+static void md_ccif_traffic_monitor_func(unsigned long data);
+static void md_ccif_traffic_timer_cb(struct timer_list *t)
+{
+	struct md_ccif_ctrl *c = from_timer(c, t, traffic_monitor);
+
+	md_ccif_traffic_monitor_func((unsigned long)c);
+}
 #endif
 
 #define TAG "cif"
@@ -1584,9 +1592,7 @@ int ccci_ccif_hif_init(unsigned char hif_id, unsigned char md_id)
 	md_ctrl = kzalloc(sizeof(struct md_ccif_ctrl), GFP_KERNEL);
 
 	INIT_WORK(&md_ctrl->ccif_sram_work, md_ccif_sram_rx_work);
-	init_timer(&md_ctrl->traffic_monitor);
-	md_ctrl->traffic_monitor.function = md_ccif_traffic_monitor_func;
-	md_ctrl->traffic_monitor.data = (unsigned long)md_ctrl;
+	timer_setup(&md_ctrl->traffic_monitor, md_ccif_traffic_timer_cb, 0);
 	md_ctrl->heart_beat_counter = 0;
 	INIT_WORK(&md_ctrl->traffic_info.traffic_work_struct,
 		md_ccif_traffic_work_func);
