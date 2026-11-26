@@ -3,7 +3,7 @@
 import sys,struct,hashlib,argparse
 p=argparse.ArgumentParser()
 p.add_argument("boot");p.add_argument("kernel");p.add_argument("out")
-p.add_argument("--cmdline-add",default="");p.add_argument("--ramdisk");p.add_argument("--dtb")
+p.add_argument("--cmdline-add",default="");p.add_argument("--cmdline-del",default="");p.add_argument("--ramdisk");p.add_argument("--dtb")
 p.add_argument("--kernel-addr",type=lambda value:int(value,0))
 a=p.parse_args()
 d=open(a.boot,"rb").read();pg=2048
@@ -17,6 +17,7 @@ k=open(a.kernel,"rb").read()
 if a.ramdisk:r=open(a.ramdisk,"rb").read()
 if a.dtb:dtb=open(a.dtb,"rb").read()
 cmd=(h[12]+h[14]).rstrip(b"\0").decode()
+dl=a.cmdline_del.split();cmd=" ".join(c for c in cmd.split() if c.split("=")[0] not in dl)
 for t in a.cmdline_add.split():
     if t.split("=")[0] not in [c.split("=")[0] for c in cmd.split()]:cmd+=" "+t
 cb=cmd.encode();assert len(cb)<1536

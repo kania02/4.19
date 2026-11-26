@@ -29,3 +29,4 @@ obj-$(CONFIG_MTK_RAM_CONSOLE) += ram_console/
 obj-y += atf/
 
 obj-$(CONFIG_MTK_AUXADC) += auxadc/
+obj-y += devinfo/

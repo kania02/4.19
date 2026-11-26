@@ -6,11 +6,6 @@
 
 /* class "sec" dibuat oleh drivers/samsung/sec_class.c */
 
-u32 get_devinfo_with_index(u32 index)
-{
-	return 0;
-}
-EXPORT_SYMBOL(get_devinfo_with_index);
 
 /* stub link-only (A02 4.19 bootstrap) */
 int vcorefs_request_dvfs_opp(int kicker, int opp) { return 0; }
