@@ -32,6 +32,7 @@ ifeq ($(CONFIG_MTK_PMIC_NEW_ARCH),y)
     subdir-ccflags-y += -Werror -I$(srctree)/drivers/misc/mediatek/pmic/include
 endif
 
+    subdir-ccflags-y += -Wno-error -Wno-strict-prototypes
     # Do Nothing, move to standalone repo
     MODULE_NAME := connadp
     obj-$(CONFIG_MTK_COMBO) += $(MODULE_NAME).o

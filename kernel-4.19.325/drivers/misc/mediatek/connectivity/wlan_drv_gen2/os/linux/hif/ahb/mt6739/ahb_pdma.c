@@ -79,9 +79,7 @@
 #include "hif_pdma.h"
 #include "gl_os.h"
 
-#ifdef CONFIG_MTK_EMI_MPU
 #include <mach/emi_mpu.h>
-#endif
 
 /* #if (CONF_MTK_AHB_DMA == 1) */
 

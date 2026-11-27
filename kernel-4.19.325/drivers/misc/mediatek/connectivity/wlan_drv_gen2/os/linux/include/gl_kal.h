@@ -266,7 +266,7 @@ struct KAL_HALT_CTRL_T {
 #if (KERNEL_VERSION(4, 9, 0) <= LINUX_VERSION_CODE)
 #if (KERNEL_VERSION(4, 14, 149) <= LINUX_VERSION_CODE)
 #define KAL_WAKE_LOCK_INIT(_prAdapter, _prWakeLock, _pcName) \
-	_prWakeLock = wakeup_source_register(NULL, _pcName);
+	_prWakeLock = wakeup_source_register(_pcName);
 #define KAL_WAKE_LOCK_DESTROY(_prAdapter, _prWakeLock) \
 { \
 	wakeup_source_unregister(_prWakeLock); \

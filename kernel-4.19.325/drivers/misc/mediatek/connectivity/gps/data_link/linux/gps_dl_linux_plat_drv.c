@@ -530,7 +530,7 @@ void gps_dl_wake_lock_init(void)
 {
 	GDL_LOGD_INI("");
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 149)
-	g_gps_dl_wake_lock_ptr = wakeup_source_register(NULL, c_gps_dl_wake_lock_name);
+	g_gps_dl_wake_lock_ptr = wakeup_source_register(c_gps_dl_wake_lock_name);
 #else
 	g_gps_dl_wake_lock_ptr = wakeup_source_register(c_gps_dl_wake_lock_name);
 #endif

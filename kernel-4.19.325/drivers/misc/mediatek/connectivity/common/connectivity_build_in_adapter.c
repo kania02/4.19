@@ -17,7 +17,7 @@
 #define DFT_TAG "[CONNADP]"
 #include "connectivity_build_in_adapter.h"
 
-#include "../../../../kernel/sched/sched.h"
+#include "../../../../../kernel/sched/sched.h"
 
 /*device tree mode*/
 #ifdef CONFIG_OF
@@ -85,10 +85,8 @@
 
 
 
-phys_addr_t gConEmiPhyBase;
-EXPORT_SYMBOL(gConEmiPhyBase);
-unsigned long long gConEmiSize;
-EXPORT_SYMBOL(gConEmiSize);
+extern phys_addr_t gConEmiPhyBase;
+extern unsigned long long gConEmiSize;
 
 phys_addr_t gGpsRsvMemPhyBase;
 EXPORT_SYMBOL(gGpsRsvMemPhyBase);
@@ -407,3 +405,18 @@ void conn_upmu_set_vcn35_on_ctrl_wifi(unsigned int val)
 }
 EXPORT_SYMBOL(conn_upmu_set_vcn35_on_ctrl_wifi);
 #endif
+
+/* br15: EMI MPU driver tidak dibawa ke 4.19, stub agar link lolos (tanpa proteksi MPU) */
+#include <mach/emi_mpu.h>
+int __weak emi_mpu_set_region_protection(unsigned long long start_addr,
+	unsigned long long end_addr, int region, unsigned int access_permission)
+{
+	return 0;
+}
+
+/* br15c stub: clkbuf/FH/SPM tidak ikut build */
+bool __weak clk_buf_ctrl(enum clk_buf_id id, bool onoff) { return true; }
+void __weak clk_buf_show_status_info(void) { }
+u8 __weak clk_buf_get_xo_en_sta(enum xo_id id) { return 0; }
+int __weak freqhopping_config(unsigned int pll_id, unsigned long def_set_idx, unsigned int enable) { return -1; }
+bool __weak spm_resource_req(unsigned int user, unsigned int req_mask) { return true; }
